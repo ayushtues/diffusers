@@ -442,8 +442,6 @@ class UNetMidBlock2D(nn.Module):
                             rescale_output_factor=output_scale_factor,
                             eps=resnet_eps,
                             norm_num_groups=resnet_groups,
-                            norm_type=resnet_time_scale_shift,
-                            temb_channels=temb_channels
                         )
                     )
             else:
@@ -2090,8 +2088,6 @@ class AttnUpDecoderBlock2D(nn.Module):
                         rescale_output_factor=output_scale_factor,
                         eps=resnet_eps,
                         norm_num_groups=resnet_groups,
-                        temb_channels=temb_channels,
-                        norm_type=resnet_time_scale_shift
                     )
                 )
 
