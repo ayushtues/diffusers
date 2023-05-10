@@ -572,7 +572,8 @@ class UNetMidBlock2DCrossAttn(nn.Module):
                 hidden_states,
                 encoder_hidden_states=encoder_hidden_states,
                 cross_attention_kwargs=cross_attention_kwargs,
-            ).sample
+                return_dict=False,
+            )[0]
             hidden_states = resnet(hidden_states, temb)
 
         return hidden_states
@@ -745,7 +746,7 @@ class AttnDownBlock2D(nn.Module):
         else:
             self.downsamplers = None
 
-    def forward(self, hidden_states, temb=None):
+    def forward(self, hidden_states, temb=None, upsample_size=None):
         output_states = ()
 
         for resnet, attn in zip(self.resnets, self.attentions):
@@ -880,15 +881,16 @@ class CrossAttnDownBlock2D(nn.Module):
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
                     cross_attention_kwargs=cross_attention_kwargs,
-                ).sample
+                    return_dict=False,
+                )[0]
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         if self.downsamplers is not None:
             for downsampler in self.downsamplers:
                 hidden_states = downsampler(hidden_states)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         return hidden_states, output_states
 
@@ -961,13 +963,13 @@ class DownBlock2D(nn.Module):
             else:
                 hidden_states = resnet(hidden_states, temb)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         if self.downsamplers is not None:
             for downsampler in self.downsamplers:
                 hidden_states = downsampler(hidden_states)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         return hidden_states, output_states
 
@@ -1354,13 +1356,13 @@ class ResnetDownsampleBlock2D(nn.Module):
             else:
                 hidden_states = resnet(hidden_states, temb)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         if self.downsamplers is not None:
             for downsampler in self.downsamplers:
                 hidden_states = downsampler(hidden_states, temb)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         return hidden_states, output_states
 
@@ -1478,13 +1480,13 @@ class SimpleCrossAttnDownBlock2D(nn.Module):
                 **cross_attention_kwargs,
             )
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         if self.downsamplers is not None:
             for downsampler in self.downsamplers:
                 hidden_states = downsampler(hidden_states, temb)
 
-            output_states += (hidden_states,)
+            output_states = output_states + (hidden_states,)
 
         return hidden_states, output_states
 
@@ -1730,7 +1732,7 @@ class AttnUpBlock2D(nn.Module):
         else:
             self.upsamplers = None
 
-    def forward(self, hidden_states, res_hidden_states_tuple, temb=None):
+    def forward(self, hidden_states, res_hidden_states_tuple, temb=None, upsample_size=None):
         for resnet, attn in zip(self.resnets, self.attentions):
             # pop res hidden states
             res_hidden_states = res_hidden_states_tuple[-1]
@@ -1871,7 +1873,8 @@ class CrossAttnUpBlock2D(nn.Module):
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
                     cross_attention_kwargs=cross_attention_kwargs,
-                ).sample
+                    return_dict=False,
+                )[0]
 
         if self.upsamplers is not None:
             for upsampler in self.upsamplers:
